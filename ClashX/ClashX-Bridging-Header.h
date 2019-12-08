@@ -3,3 +3,4 @@
 //
 #import "ClashX.h"
 #import "ProxyConfigRemoteProcessProtocol.h"
+#import "MBProgressHUD.h"
