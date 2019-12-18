@@ -92,6 +92,6 @@
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://yichengchen.github.io/clashX/appcast.xml</string>
+	<string>https://raw.githubusercontent.com/lhie1/apps/master/clashx.xml</string>
 </dict>
 </plist>
