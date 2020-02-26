@@ -4,11 +4,7 @@ import plistlib
 import os
 
 def get_version():
-    with open('./go.mod') as file:
-        for line in file.readlines():
-            if "clash" in line and "ClashX" not in line:
-                return line.split(" ")[-1].strip()
-    return "unknown"
+    return "0.18.0r"
 
 
 def build_clash(version):

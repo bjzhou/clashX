@@ -13,15 +13,17 @@ class RemoteConfigModel: Codable {
     let name: String
     var updateTime: Date?
     var updating = false
+    var type = 0
 
-    init(url: String, name: String, updateTime: Date? = nil) {
+    init(url: String, name: String, updateTime: Date? = nil, type: Int = 0) {
         self.url = url
         self.name = name
         self.updateTime = updateTime
+        self.type = type
     }
 
     private enum CodingKeys: String, CodingKey {
-        case url, name, updateTime
+        case url, name, updateTime, type
     }
 
     func displayingTimeString() -> String {

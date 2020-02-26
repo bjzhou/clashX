@@ -34,7 +34,7 @@ class RemoteConfigViewController: NSViewController {
                 guard let url = note.userInfo?["url"] as? String else { return }
 
                 let name = note.userInfo?["name"] as? String
-                self.showAdd(defaultUrl: url, name: name)
+                self.showAdd(defaultUrl: url, name: name, type: 0)
             }.disposed(by: disposeBag)
     }
 
@@ -52,7 +52,7 @@ class RemoteConfigViewController: NSViewController {
     // MARK: Actions
 
     @IBAction func actionAdd(_ sender: Any) {
-        showAdd()
+        showAdd(type: 0)
     }
 
     @IBAction func actionDelete(_ sender: Any) {
@@ -85,6 +85,7 @@ extension RemoteConfigViewController {
     func showAdd(defaultUrl: String? = nil,
                  defaultName: String? = nil,
                  name: String? = nil,
+                 type: Int,
                  allowAlt: Bool = false) {
         let alertView = NSAlert()
         alertView.addButton(withTitle: NSLocalizedString("OK", comment: ""))
@@ -92,7 +93,7 @@ extension RemoteConfigViewController {
         alertView.messageText = NSLocalizedString("Add a remote config", comment: "")
         let remoteConfigInputView = RemoteConfigAddView.createFromNib()
         if let defaultUrl = defaultUrl {
-            remoteConfigInputView.setUrl(string: defaultUrl, name: name, defaultName: defaultUrl)
+            remoteConfigInputView.setUrl(string: defaultUrl, name: name, defaultName: defaultUrl, type: type)
         }
         alertView.accessoryView = remoteConfigInputView
         let response = alertView.runModal()
@@ -108,6 +109,7 @@ extension RemoteConfigViewController {
 
         let configName = remoteConfigInputView.getConfigName()
         let configUrl = remoteConfigInputView.getUrlString()
+        let configType = remoteConfigInputView.getType()
 
         if let existed = RemoteConfigManager.shared.configs.first(where: { $0.name == configName }) {
             guard allowAlt else {
@@ -119,7 +121,8 @@ extension RemoteConfigViewController {
         } else {
             let remoteConfig = RemoteConfigModel(url: configUrl,
                                                  name: configName,
-                                                 updateTime: nil)
+                                                 updateTime: nil,
+                                                 type: configType)
             RemoteConfigManager.shared.configs.append(remoteConfig)
             requestUpdate(config: remoteConfig)
         }
@@ -164,7 +167,7 @@ extension RemoteConfigViewController: NSTableViewDelegate {
     @objc func tableViewDidDoubleClick(tableView: NSTableView) {
         let row = tableView.clickedRow
         guard let config = RemoteConfigManager.shared.configs[safe: row] else { return }
-        showAdd(defaultUrl: config.url, defaultName: nil, name: config.name, allowAlt: true)
+        showAdd(defaultUrl: config.url, defaultName: nil, name: config.name, type: config.type, allowAlt: true)
     }
 }
 
@@ -204,9 +207,22 @@ extension RemoteConfigViewController: NSTableViewDataSource {
 class RemoteConfigAddView: NSView, NibLoadable {
     @IBOutlet private var urlTextField: NSTextField!
     @IBOutlet private var configNameTextField: NSTextField!
+    @IBOutlet private var typeBox: NSPopUpButton!
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
 
     func getUrlString() -> String {
         return urlTextField.stringValue
+    }
+
+    func getType() -> Int {
+        return typeBox.indexOfSelectedItem
     }
 
     func getConfigName() -> String {
@@ -220,7 +236,7 @@ class RemoteConfigAddView: NSView, NibLoadable {
         return urlTextField.stringValue.isUrlVaild() && getConfigName().count > 0
     }
 
-    func setUrl(string: String, name: String? = nil, defaultName: String?) {
+    func setUrl(string: String, name: String? = nil, defaultName: String?, type: Int) {
         urlTextField.stringValue = string
 
         if let name = name, name.count > 0 {
@@ -231,6 +247,8 @@ class RemoteConfigAddView: NSView, NibLoadable {
             configNameTextField.placeholderString = defaultName
         }
 
+        typeBox.selectItem(at: type)
+
         if name == nil && defaultName == nil {
             updateConfigName()
         }
@@ -239,7 +257,14 @@ class RemoteConfigAddView: NSView, NibLoadable {
     private func updateConfigName() {
         guard urlTextField.stringValue.isUrlVaild() else { return }
         let urlString = urlTextField.stringValue
-        configNameTextField.placeholderString = URL(string: urlString)?.host ?? "unknown"
+        var name = URL(string: urlString)?.host ?? "unknown"
+        if getType() == 1 {
+            name += "-ssr"
+        }
+        if getType() == 2 {
+            name += "-v2ray"
+        }
+        configNameTextField.placeholderString = name
     }
 }
 

@@ -6,12 +6,17 @@ import (
 	"github.com/Dreamacro/clash/constant"
 	"github.com/Dreamacro/clash/hub/executor"
 	"github.com/Dreamacro/clash/hub/route"
+	"github.com/Dreamacro/clash/converter"
 	"github.com/phayes/freeport"
 	"net"
 	"path/filepath"
 	"strconv"
 	"strings"
 )
+
+func init() {
+	converter.Main()
+}
 
 func isAddrValid(addr string) bool {
 	if addr != "" {

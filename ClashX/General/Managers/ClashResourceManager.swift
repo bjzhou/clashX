@@ -2,6 +2,7 @@
 import Alamofire
 import AppKit
 import Foundation
+import CommonCrypto
 
 class ClashResourceManager {
     static let kProxyConfigFolder = (NSHomeDirectory() as NSString).appendingPathComponent("/.config/clash")
@@ -48,12 +49,8 @@ class ClashResourceManager {
         if FileManager.default.fileExists(atPath: kDefaultConfigFilePath) {
             do {
                 let defaultConfigData = try Data(contentsOf: URL(fileURLWithPath: kDefaultConfigFilePath))
-                var checkSum: UInt8 = 0
-                for byte in defaultConfigData {
-                    checkSum &+= byte
-                }
-
-                if checkSum == 101 {
+                Logger.log("config file md5: \(defaultConfigData.md5)")
+                if defaultConfigData.md5 != "913162c2ba44981a4db8fbc5fb8c48e6" {
                     // old error config
                     Logger.log("removing old config.yaml")
                     try FileManager.default.removeItem(atPath: kDefaultConfigFilePath)
@@ -111,5 +108,16 @@ extension ClashResourceManager {
             }
             NSUserNotificationCenter.default.post(title: title, info: info)
         }
+    }
+}
+
+extension Data {
+    var md5: String {
+        let hash = self.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) -> [UInt8] in
+            var hash = [UInt8](repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
+            CC_MD5(bytes.baseAddress, CC_LONG(self.count), &hash)
+            return hash
+        }
+        return hash.map { String(format: "%02x", $0) }.joined()
     }
 }

@@ -139,7 +139,16 @@ class RemoteConfigManager {
     }
 
     static func getRemoteConfigData(config: RemoteConfigModel, complete: @escaping ((String?) -> Void)) {
-        guard var urlRequest = try? URLRequest(url: config.url, method: .get) else {
+        let url: String
+        switch config.type {
+        case 1:
+            url = "http://localhost:5050/ssr2clashr?sub_link=\(config.url)"
+        case 2:
+            url = "http://localhost:5050/v2ray2clash?sub_link=\(config.url)"
+        default:
+            url = config.url
+        }
+        guard var urlRequest = try? URLRequest(url: url, method: .get) else {
             assertionFailure()
             Logger.log("[getRemoteConfigData] url incorrect,\(config.name) \(config.url)")
             return

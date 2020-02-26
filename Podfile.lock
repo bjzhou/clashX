@@ -32,7 +32,10 @@ DEPENDENCIES:
   - WebViewJavascriptBridge
 
 SPEC REPOS:
-  https://cdn.cocoapods.org/:
+  https://github.com/CocoaPods/Specs.git:
+    - Fabric
+    - RxSwift
+  trunk:
     - Alamofire
     - CocoaLumberjack
     - Crashlytics
@@ -43,9 +46,6 @@ SPEC REPOS:
     - Starscream
     - SwiftyJSON
     - WebViewJavascriptBridge
-  https://github.com/cocoapods/specs.git:
-    - Fabric
-    - RxSwift
 
 SPEC CHECKSUMS:
   Alamofire: ca8c0de6906873be89d6deec5c8de279e00bf872
@@ -63,4 +63,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 8dd9c30013fa97b5c735e427620c41790488a2a1
 
-COCOAPODS: 1.7.5
+COCOAPODS: 1.8.4
