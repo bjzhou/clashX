@@ -101,16 +101,8 @@ fileprivate class ProxyGroupSpeedTestMenuItemView: MenuItemBaseView {
             }
         }
 
-        for proxyName in proxies {
-            testGroup.enter()
-            ApiRequest.getProxyDelay(proxyName: proxyName) { delay in
-                let delayStr = delay == 0 ? NSLocalizedString("fail", comment: "") : "\(delay) ms"
-                NotificationCenter.default.post(name: kSpeedTestFinishForProxy,
-                                                object: nil,
-                                                userInfo: ["proxyName": proxyName, "delay": delayStr])
-                testGroup.leave()
-            }
-        }
+        testGroup.enter()
+        speedtest(proxies: proxies, testGroup: testGroup)
 
         if providers.count > 0 {
             for provider in providers {
@@ -129,6 +121,22 @@ fileprivate class ProxyGroupSpeedTestMenuItemView: MenuItemBaseView {
                 menu.isEnabled = true
                 self.setNeedsDisplay()
             }
+        }
+    }
+
+    private func speedtest(proxies: [ClashProxyName], testGroup: DispatchGroup) {
+        var testProxies = proxies
+        if testProxies.count > 0 {
+            let proxyName = testProxies.remove(at: 0)
+            ApiRequest.getProxyDelay(proxyName: proxyName) { delay in
+                let delayStr = delay == 0 ? NSLocalizedString("fail", comment: "") : "\(delay) ms"
+                NotificationCenter.default.post(name: kSpeedTestFinishForProxy,
+                                                object: nil,
+                                                userInfo: ["proxyName": proxyName, "delay": delayStr])
+                self.speedtest(proxies: testProxies, testGroup: testGroup)
+            }
+        } else {
+            testGroup.leave()
         }
     }
 }

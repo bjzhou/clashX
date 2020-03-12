@@ -200,12 +200,34 @@ class ApiRequest {
     static func getProxyDelay(proxyName: String, callback: @escaping ((Int) -> Void)) {
         req("/proxies/\(proxyName.encoded)/delay",
             method: .get,
-            parameters: ["timeout": 5000, "url": "http://www.gstatic.com/generate_204"])
+            parameters: ["timeout": 1000, "url": "http://www.gstatic.com/generate_204"])
             .responseJSON { res in
                 switch res.result {
                 case let .success(value):
-                    let json = JSON(value)
-                    callback(json["delay"].intValue)
+                    let delay1 = JSON(value)["delay"].intValue
+                    req("/proxies/\(proxyName.encoded)/delay",
+                        method: .get,
+                        parameters: ["timeout": 1000, "url": "http://www.gstatic.com/generate_204"])
+                        .responseJSON { res in
+                            switch res.result {
+                            case let .success(value):
+                                let delay2 = JSON(value)["delay"].intValue
+                                req("/proxies/\(proxyName.encoded)/delay",
+                                    method: .get,
+                                    parameters: ["timeout": 1000, "url": "http://www.gstatic.com/generate_204"])
+                                    .responseJSON { res in
+                                        switch res.result {
+                                        case let .success(value):
+                                            let delay3 = JSON(value)["delay"].intValue
+                                            callback((delay1 + delay2 + delay3)/3)
+                                        case .failure:
+                                            callback(0)
+                                        }
+                                }
+                            case .failure:
+                                callback(0)
+                            }
+                    }
                 case .failure:
                     callback(0)
                 }
